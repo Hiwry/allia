@@ -34,6 +34,10 @@ const Step = styled.div`
   color: ${({ active, theme }) => (active ? theme.colors.primary : '#aaa')};
   border-bottom: 3px solid ${({ active, theme }) => (active ? theme.colors.primary : '#eee')};
   padding-bottom: 0.5rem;
+<<<<<<< HEAD
+=======
+  transition: all 0.2s;
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 `;
 
 const steps = [
@@ -140,7 +144,11 @@ export default function NewOrderWizard() {
 
       // Adiciona o arquivo de layout ao FormData se existir
       if (layoutFile instanceof File) {
+<<<<<<< HEAD
         formData.append('layoutFile', layoutFile); 
+=======
+        formData.append('capaPedido', layoutFile); // Corrigir: deve ser 'capaPedido'!
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
       }
 
       console.log("Dados finais do pedido a serem enviados (sem vendedor explícito):", JSON.stringify(finalOrderData, null, 2));
@@ -191,8 +199,13 @@ export default function NewOrderWizard() {
                             loggedInUser={loggedInUser} 
                             onConfirm={handleConfirm} 
                             isSaving={isSaving} 
+<<<<<<< HEAD
                             layoutFile={layoutFile} 
                             setLayoutFile={setLayoutFile} 
+=======
+                            layoutFile={layoutFile} // Passa o estado
+                            setLayoutFile={setLayoutFile} // Passa o setter
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
                           />}
       </Wrapper>
     </Layout>

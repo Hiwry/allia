@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { getOrderForConfirmation, getOrder } from '../services/api';
+<<<<<<< HEAD
+=======
+import OrderConfirmationClient from '../pages/OrderConfirmationClient';
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 
 const Overlay = styled.div`
   position: fixed;
@@ -63,6 +67,7 @@ export default function PedidoModal({ pedidoId, onClose }) {
   }, [pedidoId]);
 
   if (!pedidoId) return null;
+<<<<<<< HEAD
   return (
     <Overlay onClick={onClose}>
       <ModalBox onClick={e => e.stopPropagation()}>
@@ -125,5 +130,16 @@ export default function PedidoModal({ pedidoId, onClose }) {
         ) : null}
       </ModalBox>
     </Overlay>
+=======
+  // Em vez de mostrar o modal customizado, renderize a tela de confirmação de pedido
+  return (
+    <div style={{ zIndex: 1500, position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: '#fff', borderRadius: 18, maxWidth: 900, width: '98vw', maxHeight: '93vh', overflowY: 'auto', boxShadow: '0 12px 48px #0007', padding: 0, position: 'relative' }}>
+        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 22, background: 'none', border: 'none', fontSize: '2rem', color: '#888', cursor: 'pointer', zIndex: 2 }}>&times;</button>
+        {/* Renderiza a tela de confirmação, passando o pedidoId como token */}
+        <OrderConfirmationClient tokenFromKanban={pedidoId} />
+      </div>
+    </div>
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   );
 }

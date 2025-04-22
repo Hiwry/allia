@@ -11,7 +11,11 @@ export const AuthProvider = ({ children }) => {
   const loginUser = async (credentials) => {
     setLoading(true);
     try {
+<<<<<<< HEAD
       const data = await api.login(credentials.email, credentials.password); // Corrigido para passar email e senha separadamente
+=======
+      const data = await api.login(credentials); // Chama a API real
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
       if (data.token) {
         localStorage.setItem('token', data.token);
         setToken(data.token);

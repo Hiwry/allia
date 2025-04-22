@@ -1,5 +1,9 @@
 import React from 'react';
+<<<<<<< HEAD
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+=======
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 import { ThemeProvider } from 'styled-components';
 import { AuthProvider } from './context/AuthContext';
 import { GlobalStyle } from './globalStyles';
@@ -12,11 +16,14 @@ import PedidosPage from './pages/PedidosPage';
 import OrderConfirmationClient from './pages/OrderConfirmationClient';
 import ProducaoPage from './pages/ProducaoPage';
 import ProducaoKanban from './pages/ProducaoKanban';
+<<<<<<< HEAD
 import Dashboard from './pages/Dashboard';
 import OrderList from './pages/OrderList';
 import UsuariosPage from './pages/UsuariosPage';
 import CatalogoItensPage from './pages/CatalogoItensPage';
 import ConfiguracoesPage from './pages/ConfiguracoesPage';
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 
 function App() {
   return (
@@ -53,6 +60,7 @@ function App() {
               }
             />
             <Route 
+<<<<<<< HEAD
               path="/novo-pedido" 
               element={
                 <ProtectedRoute>
@@ -105,6 +113,8 @@ function App() {
               }
             />
             <Route 
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
               path="/" 
               element={
                 <ProtectedRoute>
@@ -112,7 +122,10 @@ function App() {
                 </ProtectedRoute>
               }
             />
+<<<<<<< HEAD
             <Route path="*" element={<Navigate to="/login" replace />} />
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
           </Routes>
         </Router>
       </AuthProvider>

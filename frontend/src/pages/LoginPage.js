@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+<<<<<<< HEAD
 import { login, register } from '../services/api';
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(40px); }
@@ -124,6 +127,10 @@ function LoginPage() {
   const handleSubmit = async e => {
     e.preventDefault();
     setError('');
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
     try {
       let result;
       if (tab === 'login') {
@@ -134,6 +141,7 @@ function LoginPage() {
           setError(result.message || 'Erro ao fazer login.');
         }
       } else if (tab === 'register') {
+<<<<<<< HEAD
         const data = await register(form.name, form.email, form.password);
         if (data.token) {
           localStorage.setItem('token', data.token);
@@ -141,6 +149,9 @@ function LoginPage() {
         } else {
           setError(data.message || 'Erro ao cadastrar.');
         }
+=======
+        setError('Cadastro não implementado no AuthContext ainda.');
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
       } else if (tab === 'forgot') {
         setError('Funcionalidade em breve.');
       }

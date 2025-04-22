@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "allia-frontend": "file:",
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
     "axios": "^1.8.4",
     "formik": "^2.4.2",
     "react": "^18.2.0",

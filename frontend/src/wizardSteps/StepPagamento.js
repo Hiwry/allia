@@ -48,18 +48,30 @@ const Button = styled.button`
 `;
 
 export default function StepPagamento({ onNext, onBack, data }) {
+<<<<<<< HEAD
   const novoPagamentoInicial = { forma: '', valor: '', dataPagamento: '', id: Date.now() };
 
   const [pagamentos, setPagamentos] = React.useState(
     (data?.pagamentos && data.pagamentos.length > 0) ? data.pagamentos : [novoPagamentoInicial]
   );
 
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   const [form, setForm] = React.useState({
     forma: data.forma || '',
     valor: data.valor || '',
     status: data.status || 'pendente',
   });
 
+<<<<<<< HEAD
+=======
+  const novoPagamentoInicial = { forma: '', valor: '', dataPagamento: '', id: Date.now() };
+
+  const [pagamentos, setPagamentos] = React.useState(
+    (data?.pagamentos && data.pagamentos.length > 0) ? data.pagamentos : [novoPagamentoInicial]
+  );
+
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   const itens = data.itens || [];
   const aplicacoesPorItem = data.aplicacoesPorItem || {};
 

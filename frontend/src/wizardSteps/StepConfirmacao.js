@@ -108,6 +108,7 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
   const aplicacoesPorItem = data.aplicacoesPorItem || {};
   const pagamentos = data.pagamentos || [];
 
+<<<<<<< HEAD
   // Subtotais
   const subtotalCostura = itens.reduce((sum, item) => sum + (item.valorTotal || 0), 0);
   // Personalização: soma todas aplicações de todos os itens multiplicando pelo respectivo item.quantidade
@@ -126,6 +127,86 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
     return sum;
   }, 0);
   const subtotalGeral = subtotalCostura + subtotalPersonalizacao + acrescimosTotais;
+=======
+  // **REVISADO**: Cálculo dos valores e totais
+  const resumoUnitario = itens.map(item => {
+    const valorUnitCostura = calcularValorUnitarioCostura(item);
+    let valorUnitPersonalizacao = 0;
+    if (aplicacoesPorItem[item.id] && aplicacoesPorItem[item.id].length) {
+      valorUnitPersonalizacao = aplicacoesPorItem[item.id]
+        .map(aplic => Number(aplic.valor) || 0)
+        .reduce((s, v) => s + v, 0);
+    }
+
+    // Valor unitário base = costura + personalização
+    const valorUnitarioBase = valorUnitCostura + valorUnitPersonalizacao;
+
+    // Calcula o acréscimo unitário para cada tamanho aplicável
+    const acrescimosUnitarios = {};
+    let valorTotalAcrescimosItem = 0;
+    Object.entries(item.tamanhos || {}).forEach(([tam, qtdTamanho]) => {
+      if (Number(qtdTamanho) > 0) {
+        let acrescUnitario = 0;
+        const tamUpper = tam.toUpperCase();
+
+        if (valorUnitarioBase < 20) {
+          if (tamUpper === 'GG') acrescUnitario = 1;
+          if (tamUpper === 'EXG') acrescUnitario = 2;
+          if (tamUpper === 'G1') acrescUnitario = 10;
+          if (tamUpper === 'G2') acrescUnitario = 20;
+          if (tamUpper === 'G3') acrescUnitario = 30;
+        } else if (valorUnitarioBase >= 20 && valorUnitarioBase < 50) {
+          if (tamUpper === 'GG') acrescUnitario = 2;
+          if (tamUpper === 'EXG') acrescUnitario = 4;
+          if (tamUpper === 'G1') acrescUnitario = 10;
+          if (tamUpper === 'G2') acrescUnitario = 20;
+          if (tamUpper === 'G3') acrescUnitario = 30;
+        } else { // valorUnitarioBase >= 50
+          if (tamUpper === 'GG') acrescUnitario = 5;
+          if (tamUpper === 'EXG') acrescUnitario = 10;
+          if (tamUpper === 'G1') acrescUnitario = 15;
+          if (tamUpper === 'G2') acrescUnitario = 25;
+          if (tamUpper === 'G3') acrescUnitario = 35;
+        }
+
+        if (acrescUnitario > 0) {
+          acrescimosUnitarios[tamUpper] = acrescUnitario; // Guarda acréscimo unitário
+          valorTotalAcrescimosItem += acrescUnitario * Number(qtdTamanho); // Soma ao total de acréscimos do item
+        }
+      }
+    });
+
+    const valorUnitarioFinal = valorUnitarioBase + (item.quantidade > 0 ? valorTotalAcrescimosItem / item.quantidade : 0);
+    const valorTotalFinalItem = valorUnitarioBase * item.quantidade + valorTotalAcrescimosItem;
+
+    return {
+      descricao: item.descricao,
+      valorUnitCostura,
+      valorUnitPersonalizacao,
+      acrescimosUnitarios,
+      valorUnitarioFinal,
+      valorTotalFinalItem,
+      quantidade: item.quantidade
+    };
+  });
+
+  // **REVISADO**: Cálculos dos subtotais gerais
+  const calculatedSubtotalCostura = resumoUnitario.reduce((sum, r) => sum + r.valorUnitCostura * r.quantidade, 0);
+  const calculatedSubtotalPersonalizacao = resumoUnitario.reduce((sum, r) => sum + r.valorUnitPersonalizacao * r.quantidade, 0);
+  const calculatedSubtotalAcrescimos = resumoUnitario.reduce((sum, r) => {
+    // Encontra o item original correspondente para pegar as quantidades por tamanho
+    const itemOriginal = itens.find(i => i.descricao === r.descricao); // Assume que descricao é único por item
+    const tamanhosQtd = itemOriginal?.tamanhos || {};
+
+    // Soma os acréscimos unitários multiplicados pela quantidade de cada tamanho
+    return sum + Object.entries(r.acrescimosUnitarios).reduce((itemSum, [tam, acrescUnit]) => {
+        const qtdTamanho = tamanhosQtd[tam.toLowerCase()] || 0;
+        return itemSum + (acrescUnit * qtdTamanho);
+    }, 0);
+  }, 0);
+
+  const calculatedSubtotalGeral = calculatedSubtotalCostura + calculatedSubtotalPersonalizacao + calculatedSubtotalAcrescimos;
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 
   // Datas
   const now = new Date();
@@ -147,6 +228,7 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
   const dataEntregaStr = dataEntrega.toLocaleDateString('pt-BR');
   const entregaAntesPrazo = data.entregaDesejada && new Date(data.entregaDesejada) < dataEntrega;
 
+<<<<<<< HEAD
   // Função para renderizar cores
   const renderCores = cores => (
     <span>{cores && cores.map((c, i) => (
@@ -154,6 +236,8 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
     ))}</span>
   );
 
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   // Função para renderizar tamanhos
   const renderTamanhos = tamanhos => (
     <span>{Object.entries(tamanhos || {}).filter(([_, qtd]) => qtd > 0).map(([tam, qtd]) => (
@@ -161,6 +245,7 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
     ))}</span>
   );
 
+<<<<<<< HEAD
   // Função para renderizar imagem gola
   const IMAGENS_GOLA = {
     'Gola Careca': '/assets/golas/gola-careca.png',
@@ -168,6 +253,8 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
     'Gola V': '/assets/golas/gola-v.png',
   };
 
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   // Cálculo de valores unitários
   function calcularValorUnitarioCostura(item) {
     return item.valorTotal && item.quantidade ? item.valorTotal / item.quantidade : 0;
@@ -186,7 +273,11 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
       } else if (valorUnitario < 50) {
         if (t === "GG") acrescimo = 2;
         if (t === "EXG") acrescimo = 4;
+<<<<<<< HEAD
       } else { // valorUnitario >= 50
+=======
+      } else {
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
         if (t === "GG") acrescimo = 5;
         if (t === "EXG") acrescimo = 10;
       }
@@ -283,8 +374,13 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
         <SectionTitle>Resumo dos Itens</SectionTitle>
         {itens.map((item, index) => {
           // Encontrar o resumo correspondente para este item
+<<<<<<< HEAD
           const itemResumo = itens[index] || {}; 
           const acrescimosDoItem = itemResumo.acrescimos || {};
+=======
+          const itemResumo = resumoUnitario[index] || {}; 
+          const acrescimosDoItem = itemResumo.acrescimosUnitarios || {};
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
           const temAcrescimos = Object.keys(acrescimosDoItem).length > 0;
           
           return (
@@ -393,6 +489,7 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
               </tr>
             </thead>
             <tbody>
+<<<<<<< HEAD
               {itens.map((item, index) => {
                 const valorUnitCostura = calcularValorUnitarioCostura(item);
                 const valorUnitPersonalizacao = aplicacoesPorItem[item.id] ? aplicacoesPorItem[item.id].reduce((s, aplic) => s + (aplic.valor || 0), 0) : 0;
@@ -402,6 +499,18 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
                     <td style={{ padding: '0.6rem', borderRight: '1px solid #dee2e6' }}>{item.descricao}</td>
                     <td style={{ padding: '0.6rem', textAlign: 'right', borderRight: '1px solid #dee2e6' }}>R$ {valorUnitCostura.toFixed(2)}</td>
                     <td style={{ padding: '0.6rem', textAlign: 'right', borderRight: '1px solid #dee2e6' }}>R$ {valorUnitPersonalizacao.toFixed(2)}</td>
+=======
+              {resumoUnitario.map((itemResumo, index) => {
+                const totalUnitario = itemResumo.valorUnitCostura + itemResumo.valorUnitPersonalizacao;
+                // Busca a descrição original do item (pode melhorar se tiver ID único)
+                const itemOriginal = itens.find((_, i) => i === index); 
+                const descricaoItem = itemOriginal?.descricao || `Item ${index + 1}`;
+                return (
+                  <tr key={index} style={{ borderBottom: '1px solid #dee2e6' }}>
+                    <td style={{ padding: '0.6rem', borderRight: '1px solid #dee2e6' }}>{descricaoItem}</td>
+                    <td style={{ padding: '0.6rem', textAlign: 'right', borderRight: '1px solid #dee2e6' }}>R$ {itemResumo.valorUnitCostura.toFixed(2)}</td>
+                    <td style={{ padding: '0.6rem', textAlign: 'right', borderRight: '1px solid #dee2e6' }}>R$ {itemResumo.valorUnitPersonalizacao.toFixed(2)}</td>
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
                     <td style={{ padding: '0.6rem', textAlign: 'right', fontWeight: 'bold' }}>R$ {totalUnitario.toFixed(2)}</td>
                   </tr>
                 );
@@ -411,10 +520,17 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
         </div>
 
         <SectionTitle>Resumo Financeiro</SectionTitle>
+<<<<<<< HEAD
         <InfoItem>Subtotal Costura: R$ {subtotalCostura.toFixed(2)}</InfoItem>
         <InfoItem>Subtotal Personalização: R$ {subtotalPersonalizacao.toFixed(2)}</InfoItem>
         <InfoItem>Subtotal Acréscimos (Tamanhos Especiais): R$ {acrescimosTotais.toFixed(2)}</InfoItem>
         <InfoItem><strong>Valor Total do Pedido: R$ {subtotalGeral.toFixed(2)}</strong></InfoItem>
+=======
+        <InfoItem>Subtotal Costura: R$ {calculatedSubtotalCostura.toFixed(2)}</InfoItem>
+        <InfoItem>Subtotal Personalização: R$ {calculatedSubtotalPersonalizacao.toFixed(2)}</InfoItem>
+        <InfoItem>Subtotal Acréscimos (Tamanhos Especiais): R$ {calculatedSubtotalAcrescimos.toFixed(2)}</InfoItem>
+        <InfoItem><strong>Valor Total do Pedido: R$ {calculatedSubtotalGeral.toFixed(2)}</strong></InfoItem>
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 
         <SectionTitle>Pagamentos</SectionTitle>
         {pagamentos.length > 0 ? pagamentos.map((pag, index) => (
@@ -453,10 +569,17 @@ export default function StepConfirmacao({ onBack, data, loggedInUser, onConfirm,
         <Button onClick={() => {
           // **NOVO**: Atualiza os itens com os acréscimos calculados antes de confirmar
           const itensAtualizados = itens.map((item, index) => {
+<<<<<<< HEAD
             const resumoItem = itens[index] || {};
             return {
               ...item,
               acrescimos: resumoItem.acrescimos || {},
+=======
+            const resumoItem = resumoUnitario[index] || {};
+            return {
+              ...item,
+              acrescimos: resumoItem.acrescimosUnitarios || {},
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
               // Opcional: Atualizar valorTotalFinalItem se necessário (já parece calculado em resumoUnitario)
               // valorTotal: resumoItem.valorTotalFinalItem
             };

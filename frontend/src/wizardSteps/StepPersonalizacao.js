@@ -38,8 +38,15 @@ const Button = styled.button`
 `;
 
 export default function StepPersonalizacao({ onNext, onBack, data }) {
+<<<<<<< HEAD
   const itens = data.itens || [];
   const [aplicacoesPorItem, setAplicacoesPorItem] = useState(() => data.aplicacoesPorItem || {});
+=======
+  // Exemplo: só mostra Serigrafia se foi o tipo selecionado na costura
+  const itens = data.itens || [];
+  const [aplicacoesPorItem, setAplicacoesPorItem] = useState(() => data.aplicacoesPorItem || {});
+  // Use sempre o id real do item como chave
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   const [itemSelecionado, setItemSelecionado] = useState(
     data.itemPersonalizacao ?? (itens.length > 0 ? String(itens[0].id) : null)
   );
@@ -50,24 +57,49 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
   const [corelFile, setCorelFile] = useState(corelFilePorItem[itemSelecionado] || null);
   const [corelError, setCorelError] = useState('');
 
+<<<<<<< HEAD
   useEffect(() => {
     setAplicacoesPorItem(prev => ({ ...prev, [String(itemSelecionado)]: aplicacoes }));
   }, [aplicacoes, itemSelecionado]);
 
+=======
+  // Salva aplicações de cada item ao mudar
+  useEffect(() => {
+    setAplicacoesPorItem(prev => ({ ...prev, [String(itemSelecionado)]: aplicacoes }));
+  }, [aplicacoes, itemSelecionado]);
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   useEffect(() => {
     setCorelFilePorItem(prev => ({ ...prev, [String(itemSelecionado)]: corelFile }));
   }, [corelFile, itemSelecionado]);
 
+<<<<<<< HEAD
+=======
+  // Atualiza aplicações e corel ao trocar item selecionado
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   useEffect(() => {
     if (itemSelecionado !== null && itemSelecionado !== undefined) {
       setAplicacoes(aplicacoesPorItem[String(itemSelecionado)] || []);
       setCorelFile(corelFilePorItem[String(itemSelecionado)] || null);
     }
+<<<<<<< HEAD
   }, [itemSelecionado]);
 
   const tipo = itens.find(i => String(i.id) === String(itemSelecionado))?.personalizacao || 'Serigrafia';
   const quantidadeSelecionada = itens.find(i => String(i.id) === String(itemSelecionado))?.quantidade || 1;
 
+=======
+    // NÃO salve o estado do item anterior aqui! Só carrega o novo.
+    // O salvamento ocorre nos outros useEffect já presentes.
+  }, [itemSelecionado]);
+
+  // Troca tipo de personalização automaticamente
+  const tipo = itens.find(i => String(i.id) === String(itemSelecionado))?.personalizacao || 'Serigrafia';
+
+  // Quantidade do item selecionado
+  const quantidadeSelecionada = itens.find(i => String(i.id) === String(itemSelecionado))?.quantidade || 1;
+
+  // --- INÍCIO: Buscar valores das personalizações do backend ---
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   const [valoresPersonalizacoes, setValoresPersonalizacoes] = useState({});
   useEffect(() => {
     fetch('/api/personalizacoes')
@@ -75,6 +107,10 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
       .then(data => setValoresPersonalizacoes(data?.serigrafia || {}))
       .catch(() => setValoresPersonalizacoes({}));
   }, []);
+<<<<<<< HEAD
+=======
+  // --- FIM: Buscar valores das personalizações do backend ---
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 
   const handleCorelChange = e => {
     const file = e.target.files[0];
@@ -83,14 +119,27 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
         setCorelError('O arquivo deve ter no máximo 15MB');
         setCorelFile(null);
       } else {
+<<<<<<< HEAD
         setCorelError('');
         setCorelFile(file);
       }
+=======
+        setCorelFile(file);
+        setCorelError('');
+      }
+    } else {
+      setCorelFile(null);
+      setCorelError('');
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
     }
   };
 
   const handleSubmit = e => {
     e.preventDefault();
+<<<<<<< HEAD
+=======
+    // Salva o último estado antes de avançar
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
     const novoAplicacoesPorItem = { ...aplicacoesPorItem, [String(itemSelecionado)]: aplicacoes };
     const novoCorelFilePorItem = { ...corelFilePorItem, [String(itemSelecionado)]: corelFile };
     onNext({
@@ -139,6 +188,10 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
       {tipo === 'Sublimação Total' && (
         <PersonalizacaoSublimacaoTotal aplicacoes={aplicacoes} setAplicacoes={setAplicacoes} />
       )}
+<<<<<<< HEAD
+=======
+      {/* Campo para upload de arquivo Corel */}
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
       <Row style={{ marginTop: 24, alignItems: 'center' }}>
         <label style={{ fontWeight: 600, color: '#15616f', minWidth: 180 }}>Arquivo em Corel (.cdr, máx 15MB):</label>
         <input
@@ -147,12 +200,21 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
           onChange={handleCorelChange}
           style={{ padding: '0.5rem 0' }}
         />
+<<<<<<< HEAD
         {corelFile && <span style={{ marginLeft: 12 }}>{corelFile.name}</span>}
         {corelError && <span style={{ color: '#d32f2f', marginLeft: 18 }}>{corelError}</span>}
       </Row>
       <ButtonRow>
         <Button type="button" onClick={onBack} style={{ background: '#aaa' }}>Voltar</Button>
         <Button type="submit">Avançar</Button>
+=======
+        {corelFile && <span style={{ marginLeft: 10, color: '#22a2a2' }}>{corelFile.name}</span>}
+        {corelError && <span style={{ marginLeft: 10, color: '#d32f2f', fontWeight: 500 }}>{corelError}</span>}
+      </Row>
+      <ButtonRow>
+        <Button type="button" onClick={onBack} style={{ background: '#eee', color: '#15616f' }}>Voltar</Button>
+        <Button type="submit">Próximo</Button>
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
       </ButtonRow>
     </Form>
   );

@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+<<<<<<< HEAD
 import { getAllPedidos, deletePedido } from '../services/api'; // Importa a nova função da API
+=======
+import { getAllPedidos } from '../services/api'; // Importa a nova função da API
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 
 const Wrapper = styled.div`
   max-width: 1200px;
@@ -229,6 +233,7 @@ export default function PedidosPage() {
     setTimeout(() => setToast({ show: false, message: '' }), 2500);
   };
 
+<<<<<<< HEAD
   // Adiciona handler de exclusão
   const handleDeletePedido = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.')) {
@@ -242,6 +247,8 @@ export default function PedidosPage() {
     }
   };
 
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   const handleNewOrderClick = () => {
     navigate('/pedido');
   };
@@ -297,6 +304,7 @@ export default function PedidosPage() {
                       <td>{formatDate(pedido.createdAt)}</td>
                       <td>{formatDate(pedido.dataLimiteConfirmacao)}</td>
                       <td>
+<<<<<<< HEAD
                         <div style={{ display: 'flex', gap: 6 }}>
                           {pedido.status === 'pendente_confirmacao_cliente' && (
                             <>
@@ -312,6 +320,18 @@ export default function PedidosPage() {
                             </>
                           )}
                         </div>
+=======
+                        {pedido.status === 'pendente_confirmacao_cliente' && (
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button title="Enviar WhatsApp" onClick={() => handleWhatsAppClick(pedido)} style={{display:'flex',alignItems:'center',gap:4}}>
+                              <span role="img" aria-label="WhatsApp">📱</span>
+                            </button>
+                            <button title="Copiar Link" style={{ background: '#15616f', display:'flex',alignItems:'center',gap:4 }} onClick={() => handleCopyLink(pedido)}>
+                              <span role="img" aria-label="Copiar">🔗</span>
+                            </button>
+                          </div>
+                        )}
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
                       </td>
                     </tr>
                   ))

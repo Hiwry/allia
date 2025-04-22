@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // Importar funções da API
+<<<<<<< HEAD
 import { getOrderForConfirmation, confirmOrder } from '../services/api';
+=======
+import { getOrderForConfirmation, confirmOrder, getOrder } from '../services/api';
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
 
 // Função auxiliar para formatar data (pode mover para utils)
 const formatDate = (dateString) => {
@@ -15,8 +19,14 @@ const formatDate = (dateString) => {
   }
 };
 
+<<<<<<< HEAD
 export default function OrderConfirmationClient() {
   const { token } = useParams(); // **MUDADO**: Pega token em vez de id
+=======
+export default function OrderConfirmationClient({ tokenFromKanban }) {
+  const params = useParams();
+  const token = tokenFromKanban || params.token;
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +45,7 @@ export default function OrderConfirmationClient() {
       try {
         setLoading(true);
         setError('');
+<<<<<<< HEAD
         // **MUDADO**: Usa nova função da API
         const data = await getOrderForConfirmation(token);
         console.log("Dados do Pedido Recebidos (Objeto Completo):", data); 
@@ -68,6 +79,17 @@ export default function OrderConfirmationClient() {
 
         if (data && data._id) {
           setOrder(data); // Sempre seta o pedido, independente do status
+=======
+        // Tenta buscar por token, se falhar busca por ID
+        let data = null;
+        try {
+          data = await getOrderForConfirmation(token);
+        } catch (e) {
+          data = await getOrder(token);
+        }
+        if (data && data._id) {
+          setOrder(data);
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
         } else {
           setError('Pedido não encontrado ou token inválido.');
           setOrder(null);

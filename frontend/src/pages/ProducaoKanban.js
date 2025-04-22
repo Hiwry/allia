@@ -55,7 +55,11 @@ export default function ProducaoKanban() {
         setLoading(true);
         setError('');
         const data = await getPedidosProducao();
+<<<<<<< HEAD
         setPedidos(Array.isArray(data) ? data : []);
+=======
+        setPedidos(data);
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
       } catch (err) {
         setError(err.message || 'Erro ao buscar pedidos de produção.');
         setPedidos([]);

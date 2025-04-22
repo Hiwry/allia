@@ -98,7 +98,11 @@ const grupos = [
   { key: 'tipoMalha', label: 'Tipos de Tecido', fields: ['nome', 'tecidos'] }
 ];
 
+<<<<<<< HEAD
 function CatalogoItensPageContent({ minimalista }) {
+=======
+export default function CatalogoItensPage({ minimalista }) {
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   const [catalogItems, setCatalogItems] = useState({});
   const [loading, setLoading] = useState(false);
   const [edit, setEdit] = useState({}); // { grupo: id }
@@ -774,6 +778,7 @@ function CatalogoItensPageContent({ minimalista }) {
     </Container>
   );
 }
+<<<<<<< HEAD
 
 export default function CatalogoItensPage({ minimalista }) {
   // Garante que a sidebar sempre aparece
@@ -783,3 +788,5 @@ export default function CatalogoItensPage({ minimalista }) {
     </Layout>
   );
 }
+=======
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a

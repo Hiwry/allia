@@ -198,9 +198,12 @@ router.post('/', upload.single('capaPedido'), async (req, res) => {
       valorTotal,
       dataEntrega: dataEntregaCalculada,
       status: 'pendente_confirmacao_cliente',
-      confirmacaoClienteToken,
-      urlLayoutFinal,
-      dataLimiteConfirmacao,
+      confirmacaoClienteToken: confirmacaoClienteToken,
+      confirmacaoClienteExpiraEm: dataLimiteConfirmacao,
+      urlLayoutFinal: urlLayoutFinal,
+      dataPedido: dataAtual,
+      numeroNotaFiscal: '', // Inicializa vazio
+      statusGeral: 'aberto', // Status inicial
     });
 
     // LOG EXTRA: Verificar acréscimos de cada item

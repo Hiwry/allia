@@ -117,7 +117,11 @@ export default function Sidebar() {
     { to: '/producao', label: 'Produção', icon: '\u2699' },  // ⚙
     { to: '/usuarios', label: 'Usuários', icon: '\u25CF' },  // ●
     { to: '/configuracoes', label: 'Configurações', icon: '\u25CB' }, // ○
+<<<<<<< HEAD
     { to: '/catalogo', label: 'Catálogo de Itens', icon: '\u25B2' }, // ▲
+=======
+    { to: '/catalogo-itens', label: 'Catálogo de Itens', icon: '\u25B2' }, // ▲
+>>>>>>> 4b938adcf806d3d2cd967dfc8bb80932662d410a
   ];
   const pedidosPendentes = 5;
   return (
