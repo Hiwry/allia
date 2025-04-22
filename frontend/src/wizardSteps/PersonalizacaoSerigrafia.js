@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
+// Unified constants and logic from both branches
 const CARD_VALUES = { A4: 10, A3: 18, Escudo: 7 };
 const LOCAL_APLICACAO = [
   'Manga Direita',
@@ -77,12 +78,26 @@ const ImgPreview = styled.img`
   border: 1.5px solid #e0e0e0;
 `;
 
-function calcValorAplicacao(aplic) {
-  let valor = CARD_VALUES[aplic.tamanho] || 0;
+// Unified logic for value calculation
+function getValorFaixa(tamanho, faixasSerigrafia, quantidade) {
+  if (!faixasSerigrafia || !tamanho) return CARD_VALUES[tamanho] || 0;
+  let faixas = [];
+  if (tamanho === 'A4' && faixasSerigrafia.a4) faixas = faixasSerigrafia.a4;
+  if (tamanho === 'A3' && faixasSerigrafia.a3) faixas = faixasSerigrafia.a3;
+  if (tamanho === 'Escudo' && faixasSerigrafia.escudo) faixas = faixasSerigrafia.escudo;
+  const faixa = faixas.find(f => quantidade >= f.min && quantidade <= f.max);
+  return faixa ? faixa.valor : (CARD_VALUES[tamanho] || 0);
+}
+
+function calcValorAplicacao(aplic, faixasSerigrafia, quantidade) {
+  let valor = getValorFaixa(aplic.tamanho, faixasSerigrafia, quantidade);
   if (aplic.efeito === 'neon' || aplic.efeito === 'dourado' || aplic.efeito === 'prata') {
     valor *= 1.5;
   }
-  valor += aplic.cores?.length ? aplic.cores.length * 2 : 0; // Exemplo: R$2 por cor
+  const numCores = aplic.cores?.length || 0;
+  if (numCores > 1) {
+    valor += (numCores - 1) * 2;
+  }
   return valor;
 }
 
@@ -98,12 +113,11 @@ function handleRemoveAplic(idx, setAplicacoes, aplicacoes) {
 }
 
 function handleEditAplic(idx, aplicacoes, setAplic, setAplicacoes) {
-  // Carrega a aplicação para edição
   setAplic(aplicacoes[idx]);
   handleRemoveAplic(idx, setAplicacoes, aplicacoes);
 }
 
-export default function PersonalizacaoSerigrafia({ aplicacoes, setAplicacoes }) {
+export default function PersonalizacaoSerigrafia({ aplicacoes, setAplicacoes, faixasSerigrafia = {}, quantidade = 1 }) {
   const [aplic, setAplic] = useState({
     tamanho: '',
     efeito: '',
@@ -124,30 +138,14 @@ export default function PersonalizacaoSerigrafia({ aplicacoes, setAplicacoes }) 
       alert('Preencha o tamanho e o local da aplicação!');
       return;
     }
-    setAplicacoes([...aplicacoes, { ...aplic, valor: calcValorAplicacao(aplic) }]);
+    const novaAplicacao = { ...aplic, valor: calcValorAplicacao(aplic, faixasSerigrafia, quantidade) };
+    setAplicacoes([...aplicacoes, novaAplicacao]);
     setAplic({ tamanho: '', efeito: '', local: '', cores: [], nomesCores: [], qtdCores: 1, imagem: null, imagemUrl: '', nomeArte: '', obs: '', tamanhoPadrao: false });
   };
 
   const handleCoresPreset = preset => {
-    setAplic({ ...aplic, qtdCores: CORES_PRESET[preset].length, cores: CORES_PRESET[preset], nomesCores: Array(CORES_PRESET[preset].length).fill('') });
-  };
-
-  const handleCorChange = (idx, color) => {
-    const cores = [...aplic.cores];
-    cores[idx] = color;
-    setAplic({ ...aplic, cores });
-  };
-
-  const handleCorNomeChange = (idx, nome) => {
-    const nomesCores = [...aplic.nomesCores];
-    nomesCores[idx] = nome;
-    setAplic({ ...aplic, nomesCores });
-  };
-
-  const handleImage = e => {
-    const file = e.target.files[0];
-    if (file) {
-      setAplic({ ...aplic, imagem: file, imagemUrl: URL.createObjectURL(file) });
+    if (CORES_PRESET[preset]) {
+      setAplic({ ...aplic, cores: CORES_PRESET[preset], qtdCores: CORES_PRESET[preset].length });
     }
   };
 
@@ -156,26 +154,42 @@ export default function PersonalizacaoSerigrafia({ aplicacoes, setAplicacoes }) 
       <Card>
         <Row>
           <Label>Tamanho:</Label>
-          {Object.keys(CARD_VALUES).map(tam => (
-            <Button key={tam} type="button" onClick={() => setAplic({ ...aplic, tamanho: tam })} style={{ background: aplic.tamanho === tam ? '#15616f' : '#e0e0e0', color: aplic.tamanho === tam ? '#fff' : '#15616f' }}>{tam} (R$ {CARD_VALUES[tam]})</Button>
+          {['A4', 'A3', 'Escudo'].map(tam => (
+            <Button
+              key={tam}
+              type="button"
+              onClick={() => setAplic({ ...aplic, tamanho: tam })}
+              style={{ background: aplic.tamanho === tam ? '#15616f' : '#e0e0e0', color: aplic.tamanho === tam ? '#fff' : '#15616f', minWidth: 110 }}
+            >
+              {tam} (R$ {getValorFaixa(tam, faixasSerigrafia, quantidade).toFixed(2)})
+            </Button>
           ))}
         </Row>
         <Row>
           <Label>Efeito:</Label>
           {['', 'neon', 'dourado', 'prata'].map(ef => (
-            <Button key={ef} type="button" onClick={() => setAplic({ ...aplic, efeito: ef })} style={{ background: aplic.efeito === ef ? '#15616f' : '#e0e0e0', color: aplic.efeito === ef ? '#fff' : '#15616f' }}>{ef || 'Normal'}</Button>
+            <Button
+              key={ef}
+              type="button"
+              onClick={() => setAplic({ ...aplic, efeito: ef })}
+              style={{ background: aplic.efeito === ef ? '#15616f' : '#e0e0e0', color: aplic.efeito === ef ? '#fff' : '#15616f', minWidth: 110 }}
+            >
+              {ef || 'Normal'}
+            </Button>
           ))}
         </Row>
         <Row>
-          <Label>Local da aplicação:</Label>
+          <Label>Local:</Label>
           <Select value={aplic.local} onChange={e => setAplic({ ...aplic, local: e.target.value })}>
             <option value="">Selecione</option>
-            {LOCAL_APLICACAO.map(loc => <option key={loc}>{loc}</option>)}
+            {LOCAL_APLICACAO.map(loc => (
+              <option key={loc} value={loc}>{loc}</option>
+            ))}
           </Select>
         </Row>
         <Row>
-          <Label>Quantidade de cores:</Label>
-          <Input type="number" min="1" max="10" value={aplic.qtdCores} onChange={e => setAplic({ ...aplic, qtdCores: Number(e.target.value), cores: Array(Number(e.target.value)).fill('#000000'), nomesCores: Array(Number(e.target.value)).fill('') })} />
+          <Label>Qtd. de Cores:</Label>
+          <Input type="number" min={1} max={8} value={aplic.qtdCores} onChange={e => setAplic({ ...aplic, qtdCores: Number(e.target.value) })} />
           <Button type="button" onClick={() => handleCoresPreset('brasil')}>Bandeira do Brasil</Button>
           <Button type="button" onClick={() => handleCoresPreset('alagoas')}>Bandeira de Alagoas</Button>
         </Row>
@@ -183,24 +197,22 @@ export default function PersonalizacaoSerigrafia({ aplicacoes, setAplicacoes }) 
           <Label>Cores:</Label>
           {Array.from({ length: aplic.qtdCores }).map((_, idx) => (
             <div key={idx} style={{ display: 'flex', alignItems: 'center', marginRight: 10 }}>
-              <ColorBox value={aplic.cores[idx] || '#000000'} onChange={e => handleCorChange(idx, e.target.value)} />
-              <Input
-                type="text"
-                placeholder={`Nome da cor ${idx + 1}`}
-                value={aplic.nomesCores?.[idx] || ''}
-                onChange={e => {
-                  const nomesCores = [...(aplic.nomesCores || Array(aplic.qtdCores).fill(''))];
-                  nomesCores[idx] = e.target.value;
-                  setAplic({ ...aplic, nomesCores });
-                }}
-                style={{ width: 120, marginLeft: 5 }}
-              />
+              <ColorBox value={aplic.cores[idx] || '#ffffff'} onChange={e => {
+                const newCores = [...aplic.cores];
+                newCores[idx] = e.target.value;
+                setAplic({ ...aplic, cores: newCores });
+              }} />
+              <Input type="text" placeholder="Nome da cor" value={aplic.nomesCores[idx] || ''} onChange={e => {
+                const newNomes = [...aplic.nomesCores];
+                newNomes[idx] = e.target.value;
+                setAplic({ ...aplic, nomesCores: newNomes });
+              }} style={{ width: 90 }} />
             </div>
           ))}
         </Row>
         <Row>
           <Label>Nome da Arte:</Label>
-          <Input type="text" value={aplic.nomeArte || ''} onChange={e => setAplic({ ...aplic, nomeArte: e.target.value })} placeholder="Nome da arte/desenho" />
+          <Input type="text" value={aplic.nomeArte || ''} onChange={e => setAplic({ ...aplic, nomeArte: e.target.value })} placeholder="Nome da arte" />
         </Row>
         <Row>
           <Label>Observações:</Label>
@@ -208,16 +220,7 @@ export default function PersonalizacaoSerigrafia({ aplicacoes, setAplicacoes }) 
         </Row>
         <Row style={{ alignItems: 'center' }}>
           <input type="checkbox" id="tamanhoPadrao" checked={!!aplic.tamanhoPadrao} onChange={e => setAplic({ ...aplic, tamanhoPadrao: e.target.checked })} style={{ marginRight: 8 }} />
-          <label htmlFor="tamanhoPadrao" style={{ fontWeight: 500, cursor: 'pointer' }}>Usar tamanho padrão
-            <span style={{ color: '#22a2a2', marginLeft: 8, fontWeight: 400, fontSize: 14 }}>
-              (Escudo: 10x10cm, A4: 28x21cm, A3: 36x28cm)
-            </span>
-          </label>
-        </Row>
-        <Row>
-          <Label>Imagem da aplicação:</Label>
-          <Input type="file" accept="image/*" onChange={handleImage} />
-          {aplic.imagemUrl && <ImgPreview src={aplic.imagemUrl} alt="Preview" onClick={() => setShowZoom(aplic.imagemUrl)} />}
+          <Label htmlFor="tamanhoPadrao">Tamanho Padrão</Label>
         </Row>
         <Button type="button" onClick={handleAddAplic}>Adicionar Aplicação</Button>
       </Card>
@@ -228,10 +231,33 @@ export default function PersonalizacaoSerigrafia({ aplicacoes, setAplicacoes }) 
           Tamanho: {a.tamanho} | Valor: R$ {idx === getMenorValorIdx(aplicacoes) && aplicacoes.length > 1 ? (a.valor * 0.5).toFixed(2) : a.valor.toFixed(2)} {idx === getMenorValorIdx(aplicacoes) && aplicacoes.length > 1 ? '(50% desconto)' : ''}<br />
           Efeito: {a.efeito || 'Normal'}<br />
           Local: {a.local}<br />
-          Cores: {a.cores && a.cores.map((c, i) => <span key={i} style={{ background: c, display: 'inline-block', width: 18, height: 18, borderRadius: 4, marginRight: 3, border: '1px solid #ccc' }} />)}<br />
-          Nome da Arte: {a.nomeArte}<br />
-          Observações: {a.obs}<br />
-          {a.imagemUrl && <ImgPreview src={a.imagemUrl} alt="Preview" onClick={() => setShowZoom(a.imagemUrl)} style={{ width: 40, height: 40 }} />}
+          Cores: {
+            a.cores && a.cores.length > 0 ? (
+              a.cores.map((c, i) => (
+                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', marginRight: '8px', marginBottom: '4px' }}>
+                  <span 
+                    style={{ 
+                      background: c, 
+                      display: 'inline-block', 
+                      width: 18, 
+                      height: 18, 
+                      borderRadius: 4, 
+                      marginRight: '4px', 
+                      border: '1px solid #ccc' 
+                    }} 
+                    title={a.nomesCores?.[i] || c} 
+                  />
+                  {a.nomesCores?.[i] && <span style={{ fontSize: '0.9em', color: '#444' }}>{a.nomesCores[i]}</span>}
+                </span>
+              ))
+            ) : (
+              ' Nenhuma cor selecionada'
+            )
+          }<br />
+          Nome da Arte: {a.nomeArte || 'N/A'}<br />
+          Observações: {a.obs || 'Nenhuma'}<br />
+          Tamanho Padrão: {a.tamanhoPadrao ? 'Sim' : 'Não'}<br />
+          {a.imagemUrl && <ImgPreview src={a.imagemUrl} alt="Preview" onClick={() => setShowZoom(a.imagemUrl)} />}
           <button type="button" style={{ position: 'absolute', top: 10, right: 10, background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, padding: '3px 10px', fontWeight: 700, cursor: 'pointer' }} onClick={() => handleEditAplic(idx, aplicacoes, setAplic, setAplicacoes)}>Editar</button>
           <button type="button" style={{ position: 'absolute', top: 10, right: 70, background: '#aaa', color: '#fff', border: 'none', borderRadius: 6, padding: '3px 10px', fontWeight: 700, cursor: 'pointer' }} onClick={() => handleRemoveAplic(idx, setAplicacoes, aplicacoes)}>Excluir</button>
         </Card>

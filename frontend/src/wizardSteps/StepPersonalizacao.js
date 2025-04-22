@@ -38,10 +38,8 @@ const Button = styled.button`
 `;
 
 export default function StepPersonalizacao({ onNext, onBack, data }) {
-  // Exemplo: só mostra Serigrafia se foi o tipo selecionado na costura
   const itens = data.itens || [];
   const [aplicacoesPorItem, setAplicacoesPorItem] = useState(() => data.aplicacoesPorItem || {});
-  // Use sempre o id real do item como chave
   const [itemSelecionado, setItemSelecionado] = useState(
     data.itemPersonalizacao ?? (itens.length > 0 ? String(itens[0].id) : null)
   );
@@ -52,34 +50,31 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
   const [corelFile, setCorelFile] = useState(corelFilePorItem[itemSelecionado] || null);
   const [corelError, setCorelError] = useState('');
 
-  // Salva aplicações de cada item ao mudar
   useEffect(() => {
-    setAplicacoesPorItem(prev => ({ ...prev, [itemSelecionado]: aplicacoes }));
+    setAplicacoesPorItem(prev => ({ ...prev, [String(itemSelecionado)]: aplicacoes }));
   }, [aplicacoes, itemSelecionado]);
+
   useEffect(() => {
-    setCorelFilePorItem(prev => ({ ...prev, [itemSelecionado]: corelFile }));
+    setCorelFilePorItem(prev => ({ ...prev, [String(itemSelecionado)]: corelFile }));
   }, [corelFile, itemSelecionado]);
 
-  // Atualiza aplicações e corel ao trocar item selecionado
   useEffect(() => {
     if (itemSelecionado !== null && itemSelecionado !== undefined) {
-      setAplicacoes(aplicacoesPorItem[itemSelecionado] || []);
-      setCorelFile(corelFilePorItem[itemSelecionado] || null);
+      setAplicacoes(aplicacoesPorItem[String(itemSelecionado)] || []);
+      setCorelFile(corelFilePorItem[String(itemSelecionado)] || null);
     }
-    // NÃO salve o estado do item anterior aqui! Só carrega o novo.
-    // O salvamento ocorre nos outros useEffect já presentes.
   }, [itemSelecionado]);
 
-  // Carrega aplicações e arquivo corel do item selecionado
-  useEffect(() => {
-    if (itemSelecionado !== null && itemSelecionado !== undefined) {
-      setAplicacoes(aplicacoesPorItem[itemSelecionado] || []);
-      setCorelFile(corelFilePorItem[itemSelecionado] || null);
-    }
-  }, [itemSelecionado, aplicacoesPorItem, corelFilePorItem]);
-
-  // Troca tipo de personalização automaticamente
   const tipo = itens.find(i => String(i.id) === String(itemSelecionado))?.personalizacao || 'Serigrafia';
+  const quantidadeSelecionada = itens.find(i => String(i.id) === String(itemSelecionado))?.quantidade || 1;
+
+  const [valoresPersonalizacoes, setValoresPersonalizacoes] = useState({});
+  useEffect(() => {
+    fetch('/api/personalizacoes')
+      .then(res => res.json())
+      .then(data => setValoresPersonalizacoes(data?.serigrafia || {}))
+      .catch(() => setValoresPersonalizacoes({}));
+  }, []);
 
   const handleCorelChange = e => {
     const file = e.target.files[0];
@@ -88,20 +83,16 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
         setCorelError('O arquivo deve ter no máximo 15MB');
         setCorelFile(null);
       } else {
-        setCorelFile(file);
         setCorelError('');
+        setCorelFile(file);
       }
-    } else {
-      setCorelFile(null);
-      setCorelError('');
     }
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-    // Salva o último estado antes de avançar
-    const novoAplicacoesPorItem = { ...aplicacoesPorItem, [itemSelecionado]: aplicacoes };
-    const novoCorelFilePorItem = { ...corelFilePorItem, [itemSelecionado]: corelFile };
+    const novoAplicacoesPorItem = { ...aplicacoesPorItem, [String(itemSelecionado)]: aplicacoes };
+    const novoCorelFilePorItem = { ...corelFilePorItem, [String(itemSelecionado)]: corelFile };
     onNext({
       ...data,
       aplicacoesPorItem: novoAplicacoesPorItem,
@@ -131,7 +122,7 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
         Tipo de Personalização: <span style={{ color: '#22a2a2', fontWeight: 800 }}>{tipo}</span>
       </div>
       {tipo === 'Serigrafia' && (
-        <PersonalizacaoSerigrafia aplicacoes={aplicacoes} setAplicacoes={setAplicacoes} />
+        <PersonalizacaoSerigrafia aplicacoes={aplicacoes} setAplicacoes={setAplicacoes} faixasSerigrafia={valoresPersonalizacoes} quantidade={quantidadeSelecionada} />
       )}
       {tipo === 'Sublimação Local' && (
         <PersonalizacaoSublimacaoLocal aplicacoes={aplicacoes} setAplicacoes={setAplicacoes} />
@@ -148,7 +139,6 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
       {tipo === 'Sublimação Total' && (
         <PersonalizacaoSublimacaoTotal aplicacoes={aplicacoes} setAplicacoes={setAplicacoes} />
       )}
-      {/* Campo para upload de arquivo Corel */}
       <Row style={{ marginTop: 24, alignItems: 'center' }}>
         <label style={{ fontWeight: 600, color: '#15616f', minWidth: 180 }}>Arquivo em Corel (.cdr, máx 15MB):</label>
         <input
@@ -157,12 +147,12 @@ export default function StepPersonalizacao({ onNext, onBack, data }) {
           onChange={handleCorelChange}
           style={{ padding: '0.5rem 0' }}
         />
-        {corelFile && <span style={{ marginLeft: 10, color: '#22a2a2' }}>{corelFile.name}</span>}
-        {corelError && <span style={{ marginLeft: 10, color: '#d32f2f', fontWeight: 500 }}>{corelError}</span>}
+        {corelFile && <span style={{ marginLeft: 12 }}>{corelFile.name}</span>}
+        {corelError && <span style={{ color: '#d32f2f', marginLeft: 18 }}>{corelError}</span>}
       </Row>
       <ButtonRow>
-        <Button type="button" onClick={onBack} style={{ background: '#eee', color: '#15616f' }}>Voltar</Button>
-        <Button type="submit">Próximo</Button>
+        <Button type="button" onClick={onBack} style={{ background: '#aaa' }}>Voltar</Button>
+        <Button type="submit">Avançar</Button>
       </ButtonRow>
     </Form>
   );

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { login, register } from '../services/api';
 
 const fadeIn = keyframes`
@@ -111,22 +113,25 @@ function LoginPage() {
   const [tab, setTab] = useState('login');
   const [form, setForm] = useState({ email: '', password: '', name: '' });
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { loginUser, loading } = useAuth();
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError('');
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
     setError('');
     try {
+      let result;
       if (tab === 'login') {
-        const data = await login(form.email, form.password);
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          window.location.href = '/dashboard';
+        result = await loginUser({ email: form.email, password: form.password });
+        if (result.success) {
+          navigate('/dashboard');
         } else {
-          setError(data.message || 'Erro ao fazer login.');
+          setError(result.message || 'Erro ao fazer login.');
         }
       } else if (tab === 'register') {
         const data = await register(form.name, form.email, form.password);
@@ -140,7 +145,8 @@ function LoginPage() {
         setError('Funcionalidade em breve.');
       }
     } catch (err) {
-      setError('Erro de conexão com o servidor.');
+      console.error('Login Page Submit Error:', err);
+      setError('Ocorreu um erro inesperado.');
     }
   };
 
@@ -153,27 +159,29 @@ function LoginPage() {
           <Tab active={tab === 'register'} onClick={() => setTab('register')}>Cadastrar</Tab>
           <Tab active={tab === 'forgot'} onClick={() => setTab('forgot')}>Recuperar Senha</Tab>
         </TabSwitcher>
-        {tab === 'login' && (
-          <form onSubmit={handleSubmit} autoComplete="off">
-            <Input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-            <Input type="password" name="password" placeholder="Senha" value={form.password} onChange={handleChange} required />
-            <Button type="submit">Entrar</Button>
-          </form>
-        )}
-        {tab === 'register' && (
-          <form onSubmit={handleSubmit} autoComplete="off">
-            <Input type="text" name="name" placeholder="Nome" value={form.name} onChange={handleChange} required />
-            <Input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-            <Input type="password" name="password" placeholder="Senha" value={form.password} onChange={handleChange} required />
-            <Button type="submit">Cadastrar</Button>
-          </form>
-        )}
-        {tab === 'forgot' && (
-          <form onSubmit={handleSubmit} autoComplete="off">
-            <Input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-            <Button type="submit">Recuperar Senha</Button>
-          </form>
-        )}
+        <fieldset disabled={loading} style={{ border: 'none', padding: 0, margin: 0 }}>
+          {tab === 'login' && (
+            <form onSubmit={handleSubmit} autoComplete="off">
+              <Input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
+              <Input type="password" name="password" placeholder="Senha" value={form.password} onChange={handleChange} required />
+              <Button type="submit" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</Button>
+            </form>
+          )}
+          {tab === 'register' && (
+            <form onSubmit={handleSubmit} autoComplete="off">
+              <Input type="text" name="name" placeholder="Nome" value={form.name} onChange={handleChange} required />
+              <Input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
+              <Input type="password" name="password" placeholder="Senha" value={form.password} onChange={handleChange} required />
+              <Button type="submit" disabled={loading}>{loading ? 'Cadastrando...' : 'Cadastrar'}</Button>
+            </form>
+          )}
+          {tab === 'forgot' && (
+            <form onSubmit={handleSubmit} autoComplete="off">
+              <Input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
+              <Button type="submit" disabled={loading}>Recuperar Senha</Button>
+            </form>
+          )}
+        </fieldset>
         {error && <ErrorMsg>{error}</ErrorMsg>}
       </Card>
     </Container>

@@ -48,36 +48,32 @@ const Button = styled.button`
 `;
 
 export default function StepPagamento({ onNext, onBack, data }) {
+  const novoPagamentoInicial = { forma: '', valor: '', dataPagamento: '', id: Date.now() };
+
+  const [pagamentos, setPagamentos] = React.useState(
+    (data?.pagamentos && data.pagamentos.length > 0) ? data.pagamentos : [novoPagamentoInicial]
+  );
+
   const [form, setForm] = React.useState({
-    metodo: data.metodo || '',
+    forma: data.forma || '',
     valor: data.valor || '',
     status: data.status || 'pendente',
   });
 
-  const [pagamentos, setPagamentos] = React.useState([
-    { metodo: '', valor: '', id: Date.now() }
-  ]);
-
-  // Calcular subtotais
   const itens = data.itens || [];
-  // Personalização por item (wizard novo)
   const aplicacoesPorItem = data.aplicacoesPorItem || {};
 
-  // Subtotal Costura
   const subtotalCostura = itens.reduce((sum, item) => sum + (item.valorTotal || 0), 0);
 
-  // Subtotal Personalização (todas aplicações de todos os itens)
   let subtotalPersonalizacao = 0;
   if (aplicacoesPorItem) {
     subtotalPersonalizacao = Object.entries(aplicacoesPorItem).reduce((sum, [itemId, aplicacoes]) => {
-      // Procura quantidade do item correspondente
       const item = itens.find(i => String(i.id) === String(itemId) || i.id === itemId || i.id == itemId);
       const qtd = item && item.quantidade ? item.quantidade : 1;
       return sum + aplicacoes.reduce((s, aplic) => s + (aplic.valor || 0) * qtd, 0);
     }, 0);
   }
 
-  // Acrescimos GG/EXG/G1+/G2+/G3+
   const acrescimosTotais = itens.reduce((sum, item) => {
     if (item.acrescimos) {
       return sum + Object.values(item.acrescimos).reduce((a, b) => a + Number(b), 0);
@@ -85,10 +81,8 @@ export default function StepPagamento({ onNext, onBack, data }) {
     return sum;
   }, 0);
 
-  // Subtotal geral
   const subtotalGeral = subtotalCostura + subtotalPersonalizacao + acrescimosTotais;
 
-  // Atualiza pagamentos ao trocar subtotal
   React.useEffect(() => {
     setPagamentos(pags => {
       if (pags.length === 1) {
@@ -103,7 +97,7 @@ export default function StepPagamento({ onNext, onBack, data }) {
   };
 
   const handleAddPagamento = () => {
-    setPagamentos(pags => [...pags, { metodo: '', valor: '', id: Date.now() }]);
+    setPagamentos(pags => [...pags, { ...novoPagamentoInicial, id: Date.now() }]);
   };
 
   const handleRemovePagamento = idx => {
@@ -115,30 +109,37 @@ export default function StepPagamento({ onNext, onBack, data }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    // Validação: todos métodos preenchidos, valores > 0
-    if (pagamentos.some(p => !p.metodo || !p.valor || Number(p.valor) <= 0)) {
-      alert('Preencha todos os métodos e valores válidos!');
+
+    if (pagamentos.some(p => !p.forma || !p.valor || Number(p.valor) <= 0)) {
+      alert('Preencha todos os métodos (forma) e valores de pagamento válidos (maiores que zero)!');
       return;
     }
-    // Permite seguir mesmo se valor pago for menor que o total
-    // Passa valor de falta para próxima etapa
-    onNext({ ...form, pagamentos, faltaPagar: subtotalGeral - totalPagamentos });
+
+    const pagamentosFormatados = pagamentos.map(({ id, valor, dataPagamento, forma, ...resto }) => ({
+      ...resto,
+      forma: forma,
+      valor: Number(valor),
+      dataPagamento: dataPagamento ? new Date(dataPagamento + 'T00:00:00') : null
+    }));
+
+    const totalPagoFormatado = pagamentosFormatados.reduce((sum, p) => sum + p.valor, 0);
+
+    onNext({ pagamentos: pagamentosFormatados, faltaPagar: subtotalGeral - totalPagoFormatado });
   };
 
   return (
     <Form onSubmit={handleSubmit} autoComplete="off">
-      {/* Pagamentos múltiplos */}
       <div style={{ background: '#f8f9fa', borderRadius: 10, padding: 16, marginBottom: 16, color: '#15616f', fontWeight: 500, fontSize: 17 }}>
         <div style={{ marginBottom: 10, fontWeight: 600 }}>Formas de Pagamento</div>
         {pagamentos.map((pag, idx) => (
-          <Row key={pag.id} style={{ alignItems: 'center', marginBottom: 6 }}>
+          <Row key={pag.id} style={{ alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
             <Select
-              value={pag.metodo}
-              onChange={e => handlePagamentoChange(idx, 'metodo', e.target.value)}
+              value={pag.forma}
+              onChange={e => handlePagamentoChange(idx, 'forma', e.target.value)}
               required
-              style={{ minWidth: 180 }}
+              style={{ minWidth: 180, flexBasis: '200px' }}
             >
-              <option value="">Método de Pagamento</option>
+              <option value="">Forma</option>
               <option value="dinheiro">Dinheiro/Espécie</option>
               <option value="entrada">Entrada em Dinheiro</option>
               <option value="transf">Transf Bancária</option>
@@ -155,28 +156,29 @@ export default function StepPagamento({ onNext, onBack, data }) {
               value={pag.valor}
               onChange={e => handlePagamentoChange(idx, 'valor', e.target.value)}
               required
-              style={{ maxWidth: 120 }}
+              style={{ maxWidth: 120, flexBasis: '120px' }}
+            />
+            <Input
+              type="date"
+              value={pag.dataPagamento || ''}
+              onChange={e => handlePagamentoChange(idx, 'dataPagamento', e.target.value)}
+              style={{ maxWidth: 150, flexBasis: '150px' }}
             />
             {pagamentos.length > 1 && (
-              <Button type="button" style={{ background: '#eee', color: '#d32f2f', marginLeft: 6 }} onClick={() => handleRemovePagamento(idx)}>-</Button>
+              <Button type="button" style={{ background: '#e57373', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleRemovePagamento(idx)}>Remover</Button>
             )}
           </Row>
         ))}
-        <Button type="button" style={{ background: '#22a2a2', color: '#fff', marginTop: 8, marginBottom: 8 }} onClick={handleAddPagamento}>+ Adicionar Pagamento</Button>
-        <div style={{ marginTop: 10, fontSize: 16, fontWeight: 600 }}>
-          Total informado: <span style={{ color: totalPagamentos === subtotalGeral ? '#22a2a2' : '#d32f2f' }}>R$ {totalPagamentos.toFixed(2)}</span>
+        <Button type="button" style={{ background: '#64b5f6', marginTop: 10 }} onClick={handleAddPagamento}>+ Adicionar Pagamento</Button>
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e0e0e0' }}>
+          <div>Subtotal Costura: R$ {subtotalCostura.toFixed(2)}</div>
+          <div>Subtotal Personalização: R$ {subtotalPersonalizacao.toFixed(2)}</div>
+          <div style={{ color: '#f39c12', fontWeight: 700 }}>Subtotal Acréscimos: R$ {acrescimosTotais.toFixed(2)}</div>
+          <div style={{ fontWeight: 700, marginTop: 8 }}>Total: R$ {subtotalGeral.toFixed(2)}</div>
+          <div style={{ color: '#22a2a2', fontWeight: 600 }}>Total Pago: R$ {totalPagamentos.toFixed(2)}</div>
+          {troco < -0.005 && <div style={{ color: '#d32f2f', fontWeight: 700 }}>Falta: R$ {Math.abs(troco).toFixed(2)}</div>}
+          {troco > 0.005 && <div style={{ color: '#22a2a2', fontWeight: 700 }}>Troco: R$ {troco.toFixed(2)}</div>}
         </div>
-        {/* Resumo de pagamento/falta/troco */}
-        {(() => {
-          if (totalPagamentos < subtotalGeral) {
-            return <div style={{ color: '#d32f2f', fontWeight: 700, marginTop: 4 }}>Falta pagar: R$ {(subtotalGeral - totalPagamentos).toFixed(2)}</div>;
-          } else if (totalPagamentos > subtotalGeral) {
-            return <div style={{ color: '#22a2a2', fontWeight: 700, marginTop: 4 }}>Troco: R$ {(totalPagamentos - subtotalGeral).toFixed(2)}</div>;
-          } else if (totalPagamentos === subtotalGeral && subtotalGeral > 0) {
-            return <div style={{ color: '#22a2a2', fontWeight: 700, marginTop: 4 }}>Pagamento completo</div>;
-          }
-          return null;
-        })()}
       </div>
       <ButtonRow>
         <Button type="button" onClick={onBack} style={{ background: '#eee', color: '#15616f' }}>Voltar</Button>

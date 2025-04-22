@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { getCatalog } from '../services/catalogApi';
+import Select from 'react-select';
 
 const PERSONALIZACOES = [
   'Serigrafia',
@@ -65,7 +67,6 @@ const VALORES_DETALHE = { 'Vivo contrastante': 4, 'Punho especial': 7, 'Recorte 
 const GOLAS = ['Gola Careca', 'Gola Polo', 'Gola V'];
 const DETALHES = ['Vivo contrastante', 'Punho especial', 'Recorte lateral'];
 const TAMANHOS = ['pp', 'p', 'm', 'g', 'gg', 'exg', 'g1', 'g2', 'g3'];
-
 const IMAGENS_GOLA = {
   'Gola Careca': '/assets/golas/gola-careca.png',
   'Gola Polo': '/assets/golas/gola-polo.png',
@@ -99,7 +100,7 @@ const Label = styled.label`
   color: #15616f;
   font-size: 1.08rem;
 `;
-const Select = styled.select`
+const StyledSelect = styled.select`
   padding: 0.9rem 1.2rem;
   border-radius: 14px;
   border: 1.5px solid #c2e3e3;
@@ -227,6 +228,58 @@ const ItemResumoLinha = styled.div`
   font-size: 1.02rem;
 `;
 
+const CorOption = ({ color, name }) => (
+  <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+    <span style={{
+      display: 'inline-block',
+      width: 18,
+      height: 18,
+      borderRadius: '50%',
+      background: color,
+      border: '1px solid #bbb',
+      marginRight: 8
+    }} />
+    <span>{name}</span>
+  </span>
+);
+
+// Componente para opção de cor customizada
+const ColorOption = (props) => {
+  const { data, innerProps, innerRef } = props;
+  return (
+    <div ref={innerRef} {...innerProps} style={{ display: 'flex', alignItems: 'center', padding: 8 }}>
+      <span style={{
+        display: 'inline-block',
+        width: 18,
+        height: 18,
+        borderRadius: '50%',
+        background: data.rgb,
+        border: '1px solid #bbb',
+        marginRight: 8
+      }} />
+      <span>{data.label}</span>
+    </div>
+  );
+};
+
+const ColorSingleValue = (props) => {
+  const { data } = props;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+      <span style={{
+        display: 'inline-block',
+        width: 18,
+        height: 18,
+        borderRadius: '50%',
+        background: data.rgb,
+        border: '1px solid #bbb',
+        marginRight: 8
+      }} />
+      {data.label}
+    </span>
+  );
+};
+
 export default function StepCosturaV2({ data, onNext, onBack }) {
   const [form, setForm] = useState({
     personalizacao: '',
@@ -327,44 +380,44 @@ export default function StepCosturaV2({ data, onNext, onBack }) {
       <Card>
         <Row>
           <Label>Tipo de personalização:</Label>
-          <Select value={form.personalizacao} onChange={e => handleChange('personalizacao', e.target.value)}>
+          <StyledSelect value={form.personalizacao} onChange={e => handleChange('personalizacao', e.target.value)}>
             <option value="">Selecione</option>
             {PERSONALIZACOES.map(p => <option key={p}>{p}</option>)}
-          </Select>
+          </StyledSelect>
         </Row>
         {form.personalizacao && (
           <>
             <Row>
               <Label>Malha/Tecido:</Label>
-              <Select value={form.malha} onChange={e => handleChange('malha', e.target.value)}>
+              <StyledSelect value={form.malha} onChange={e => handleChange('malha', e.target.value)}>
                 <option value="">Selecione</option>
                 {malhas.map(m => <option key={m}>{m}</option>)}
-              </Select>
+              </StyledSelect>
             </Row>
             {form.malha && (
               <>
                 <Row>
                   <Label>Tipo de tecido/malha:</Label>
-                  <Select value={form.tipoMalha} onChange={e => handleChange('tipoMalha', e.target.value)}>
+                  <StyledSelect value={form.tipoMalha} onChange={e => handleChange('tipoMalha', e.target.value)}>
                     <option value="">Selecione</option>
                     {tiposMalha.map(t => <option key={t}>{t}</option>)}
-                  </Select>
+                  </StyledSelect>
                 </Row>
                 {form.tipoMalha && (
                   <>
                     <Row>
                       <Label>Cor do tecido:</Label>
-                      <Select value={form.cor} onChange={e => handleChange('cor', e.target.value)}>
+                      <StyledSelect value={form.cor} onChange={e => handleChange('cor', e.target.value)}>
                         <option value="">Selecione</option>
                         {cores.map(c => <option key={c}>{c}</option>)}
-                      </Select>
+                      </StyledSelect>
                     </Row>
                     <Row>
                       <Label>Tipo de corte:</Label>
-                      <Select value={form.corte} onChange={e => handleChange('corte', e.target.value)}>
+                      <StyledSelect value={form.corte} onChange={e => handleChange('corte', e.target.value)}>
                         <option value="">Selecione</option>
                         {cortes.map(c => <option key={c}>{c}</option>)}
-                      </Select>
+                      </StyledSelect>
                       {form.valor && (
                         <span style={{ fontWeight: 700, color: '#15616f', marginLeft: 12 }}>
                           Valor: R$ {form.valor}

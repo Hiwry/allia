@@ -7,6 +7,7 @@ const router = express.Router();
 
 // Cadastro
 router.post('/register', async (req, res) => {
+  console.log('POST /register body:', req.body); // LOG
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -21,14 +22,19 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
+    console.error('Erro no /register:', err); // LOG
     res.status(500).json({ message: 'Erro ao cadastrar.' });
   }
 });
 
 // Login
 router.post('/login', async (req, res) => {
+  console.log('POST /login req.body:', req.body); // LOG
   try {
     const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
+    }
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Usuário não encontrado.' });
@@ -40,7 +46,8 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
-    res.status(500).json({ message: 'Erro ao fazer login.' });
+    console.error('Erro no /login:', err);
+    res.status(500).json({ message: 'Erro interno ao fazer login.' });
   }
 });
 

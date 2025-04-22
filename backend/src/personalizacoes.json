@@ -1,0 +1,16 @@
+{
+  "serigrafia": {
+    "escudo": [
+      { "min": 50, "max": 99, "valor": 3.99 }
+    ],
+    "a4": [
+      { "min": 50, "max": 99, "valor": 6.99 }
+    ],
+    "a3": [
+      { "min": 50, "max": 99, "valor": 7.99 }
+    ],
+    "cor": [
+      { "min": 50, "max": 99, "valor": 1.99 }
+    ]
+  }
+}
