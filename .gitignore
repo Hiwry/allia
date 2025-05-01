@@ -1,0 +1,16 @@
+# Node.js
+node_modules/
+npm-debug.log
+.env
+uploads/
+# React
+build/
+dist/
+# IDEs e SO
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
+# Outros
+*.env.*
+coverage/

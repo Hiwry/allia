@@ -1,0 +1,8 @@
+---
+deployment:
+  tasks:
+    - export NODE_ENV=production
+    - cd frontend
+    - npm install
+    - npm run build
+    - cp -r build/* ../public_html/
